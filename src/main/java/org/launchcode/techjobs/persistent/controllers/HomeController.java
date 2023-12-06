@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,12 @@ public class HomeController {
 
     @RequestMapping("/")
     public String index(Model model) {
+        Iterable<Job> jobsIterable = jobRepository.findAll();
+        List<Job> jobs = new ArrayList<>();
+        for (Job job : jobsIterable) {
+            jobs.add(job);
+        }
+        model.addAttribute("jobs", jobs);
         model.addAttribute("title", "MyJobs");
         return "index";
     }
@@ -73,6 +80,13 @@ public class HomeController {
 
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
-        return "view";
+        Optional<Job> optJob = jobRepository.findById(jobId);
+        if (optJob.isPresent()) {
+            model.addAttribute("job", optJob.get());
+            return "view";
+        } else {
+            model.addAttribute("error", "Invalid job ID " + jobId);
+            return "error";
+        }
     }
 }
